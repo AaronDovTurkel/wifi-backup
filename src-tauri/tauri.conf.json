@@ -30,7 +30,7 @@
         "icons/logo.png"
         
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.wifi-backup.dev",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
