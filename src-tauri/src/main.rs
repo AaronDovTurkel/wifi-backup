@@ -169,6 +169,8 @@ fn main() {
           })
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();
+            #[cfg(debug_assertions)]
+            main_window.open_devtools();
             let state: MyState = MyState(app.state::<MyState>().0.clone());
             spawn(move || loop {
                 sleep(Duration::from_secs(1));

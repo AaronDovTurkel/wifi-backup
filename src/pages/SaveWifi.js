@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api';
 import { useState } from 'react';
 import { toast } from "react-toastify";
+import './SaveWifi.css';
 
 function SaveWifi({ togglePage, ssid }) {
 
@@ -23,7 +24,7 @@ function SaveWifi({ togglePage, ssid }) {
 
     return (
         <div className="save-wifi">
-            <h2 className="save-wifi_header">{ssid}</h2>
+            <h2 className="save-wifi_header">SSID: {ssid}</h2>
             <input className="save-wifi_input" type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
             <button className="save-wifi_button" onClick={() => save()}>Save</button>
         </div>

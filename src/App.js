@@ -45,7 +45,7 @@ function App() {
         </h1>
         {currentPage(page, selectedSSID)}
       </main>
-      <footer className="app_footer">Made with 🍻 by <a className='app_link' href="https://aarondovturkel.com" target="_blank" rel="noreferrer">Aaron Dov Turkel</a></footer>
+      <footer className="app_footer">Made with 🍻 by &nbsp;<a className='app_link' href="https://aarondovturkel.com" target="_blank" rel="noreferrer">Aaron Dov Turkel</a></footer>
       <ToastContainer />
     </div>
   );

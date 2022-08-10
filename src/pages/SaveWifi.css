@@ -1,0 +1,30 @@
+.save-wifi {
+    display: grid;
+    padding: 45px;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: start;
+}
+
+.save-wifi_header {
+    margin-block-end: 0px;
+    margin-block-start: 8px;
+}
+
+.save-wifi_input {
+    padding: 10px 15px;
+    font-size: 14px;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.save-wifi_button {
+    padding: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    background: white;
+    font-size: 14px;
+    font-weight: bold;
+    width: 200px;
+    cursor: pointer;
+  }
+
