@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use persy::{Config as PersyConfig, Persy, PersyId, SegmentId};
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use tauri::{Manager, SystemTray, SystemTrayEvent};
 use wifi_rs::{prelude::*, WiFi as WifiClient};
 use wifiscanner::{self, Wifi};
 
@@ -130,6 +130,43 @@ fn main() {
             Persy::open_or_create_with(STORAGE_PATH, PersyConfig::new(), |persy| Ok(()))
                 .expect("Error opening or creating persy"),
         ))
+        .system_tray(new_sys_tray())
+        .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::LeftClick {
+              position: _,
+              size: _,
+              ..
+            } => {
+              println!("system tray received a left click");
+            }
+            SystemTrayEvent::RightClick {
+              position: _,
+              size: _,
+              ..
+            } => {
+              println!("system tray received a right click");
+            }
+            SystemTrayEvent::DoubleClick {
+              position: _,
+              size: _,
+              ..
+            } => {
+              println!("system tray received a double click");
+            }
+            SystemTrayEvent::MenuItemClick { id, .. } => {
+              match id.as_str() {
+                "quit" => {
+                  std::process::exit(0);
+                }
+                "hide" => {
+                  let window = app.get_window("main").unwrap();
+                  window.hide().unwrap();
+                }
+                _ => {}
+              }
+            }
+            _ => {}
+          })
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();
             let state: MyState = MyState(app.state::<MyState>().0.clone());
@@ -143,7 +180,8 @@ fn main() {
                 if dropped && !backup_wifi_list.is_empty() {
                     backup_wifi_list.sort_by(|a, b| a.signal_level.cmp(&b.signal_level));
                     let strongest_backup_wifi = backup_wifi_list.last().unwrap();
-                    let wifi_password = get_wifi_password(&strongest_backup_wifi.ssid).expect("Error getting wifi password");
+                    let wifi_password = get_wifi_password(&strongest_backup_wifi.ssid)
+                        .expect("Error getting wifi password");
                     connect_to_wifi(&strongest_backup_wifi.ssid, &wifi_password);
                 } else {
                     main_window
@@ -203,7 +241,9 @@ fn get_wifi_list(current_wifi_info: WifiInfo, filter: bool, persy: &Persy) -> Ve
             .collect();
         wifi_list
             .into_iter()
-            .filter(|wifi| saved_ssids.contains(&wifi.ssid) && &wifi.ssid != &current_wifi_info.SSID)
+            .filter(|wifi| {
+                saved_ssids.contains(&wifi.ssid) && &wifi.ssid != &current_wifi_info.SSID
+            })
             .collect()
     } else {
         wifi_list
@@ -316,7 +356,7 @@ fn delete_from_store(persy: &Persy, ssid: &str) -> Result<(), String> {
 fn has_signal_level_dropped(wifi_list: &Vec<WiFi>, ssid: &str) -> bool {
     let connected_wifi = wifi_list.into_iter().find(|wifi| wifi.ssid == ssid);
     match connected_wifi {
-        Some(wifi) => wifi.signal_level.parse::<i32>().unwrap() < -25,
+        Some(wifi) => wifi.signal_level.parse::<i32>().unwrap() < -75,
         None => false,
     }
 }
@@ -341,4 +381,17 @@ fn connect_to_wifi(ssid: &str, password: &str) -> Result<(), WifiConnectionError
     }
 
     Ok(())
+}
+
+fn new_sys_tray() -> SystemTray {
+    use tauri::{CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem};
+
+    // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    let hide = CustomMenuItem::new("hide".to_string(), "Hide");
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(quit)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(hide);
+    SystemTray::new().with_menu(tray_menu)
 }
